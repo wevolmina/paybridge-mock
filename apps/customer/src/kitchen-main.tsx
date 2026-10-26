@@ -1,3 +1,4 @@
-import {createRoot} from "react-dom/client";
-import KitchenExperience from "./KitchenExperience";
-createRoot(document.getElementById("root")!).render(<KitchenExperience/>);
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import ScenarioExperience from './ScenarioExperience';
+createRoot(document.getElementById('root')!).render(<React.StrictMode><ScenarioExperience initialRoom="kitchen"/></React.StrictMode>);
