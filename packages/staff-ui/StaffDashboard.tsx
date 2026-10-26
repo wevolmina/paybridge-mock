@@ -11,6 +11,7 @@ import {
 import SocialLogin from "./SocialLogin";
 import StaffAccess from "./StaffAccess";
 import StaffRequests from "./StaffRequests";
+import ScenarioReference from "./ScenarioReference";
 import {PrivateInput,PrivateValue} from "./PrivateFields";
 import "./social-login.css";
 import "./workspace.css";
@@ -451,6 +452,7 @@ export default function StaffDashboard({
                   </button>
                 </div>
               )}
+              {admin && data && view==="packages" && <ScenarioReference admin/>}
               {admin && data && (
                 <section
                   hidden={view!=="packages"}
