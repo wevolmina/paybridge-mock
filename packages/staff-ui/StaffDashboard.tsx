@@ -567,6 +567,7 @@ export default function StaffDashboard({
                   </div>
                 </section>
               )}
+              {!admin && data && view==="overview" && <ScenarioReference/>}
               <div hidden={view!=="overview" && view!=="transactions"}><div hidden={view!=="overview"}><div className="dashboard-summary">
                 <div>
                   <span className="eyebrow">STORE OVERVIEW</span>
