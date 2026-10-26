@@ -11,6 +11,7 @@ import {
 import SocialLogin from "./SocialLogin";
 import StaffAccess from "./StaffAccess";
 import StaffRequests from "./StaffRequests";
+import InquiryInbox from "./InquiryInbox";
 import ScenarioReference from "./ScenarioReference";
 import {PrivateInput,PrivateValue} from "./PrivateFields";
 import "./social-login.css";
@@ -93,7 +94,7 @@ export default function StaffDashboard({
     [revision, setRevision] = useState(0);
   const [view, setView] = useState(admin ? "packages" : "overview");
   const viewHeading = useRef<HTMLHeadingElement>(null);
-  const views = admin ? ["packages", "accounts", "transactions", "activity"] : ["overview", "transactions", "accounts"];
+  const views = admin ? ["packages", "accounts", "transactions", "inquiries", "activity"] : ["overview", "transactions", "inquiries", "accounts"];
   useEffect(() => {
     const sync = () => { const hash = window.location.hash.slice(1); if (views.includes(hash)) setView(hash); };
     sync(); window.addEventListener("hashchange", sync);
@@ -383,7 +384,7 @@ export default function StaffDashboard({
           </div>
         </div>
         <nav aria-label={admin ? "관리자 메뉴" : "판매자 메뉴"}>
-          {(admin ? [["packages","공간·패키지"],["accounts",canManageAccounts?"계정·권한":"내 계정"],["transactions","주문 현황"],["activity","변경 이력"]] : [["overview","매출 개요"],["transactions","주문 내역"],["accounts","내 계정"]]).map(([key,label],i)=><a key={key} href={"#"+key} className={view===key?"active":undefined} aria-current={view===key?"page":undefined} onClick={e=>{e.preventDefault();navigate(key)}} aria-disabled={accessBusy}><span className="nav-number" aria-hidden="true">0{i+1}</span>{label}</a>)}
+          {(admin ? [["inquiries","문의 관리"],["packages","공간·패키지"],["accounts",canManageAccounts?"계정·권한":"내 계정"],["transactions","주문 현황"],["activity","변경 이력"]] : [["overview","매출 개요"],["inquiries","고객 문의"],["transactions","주문 내역"],["accounts","내 계정"]]).map(([key,label],i)=><a key={key} href={"#"+key} className={view===key?"active":undefined} aria-current={view===key?"page":undefined} onClick={e=>{e.preventDefault();navigate(key)}} aria-disabled={accessBusy}><span className="nav-number" aria-hidden="true">0{i+1}</span>{label}</a>)}
           <div className="nav-external-label">다른 공간</div>
           {(admin || adminSiteUrl) && <a href={admin ? merchantSiteUrl : adminSiteUrl}>{admin ? "판매자 센터" : "관리자 사이트"}<span aria-hidden="true">↗</span></a>}
           <a href="https://paybridge-mock.web.app/">고객 스토어<span aria-hidden="true">↗</span></a>
@@ -405,9 +406,9 @@ export default function StaffDashboard({
               <span className="eyebrow">
                 {admin ? "SPACE & PACKAGE MANAGEMENT" : "YOUR SMART HOME STORE"}
               </span>
-              <h1 ref={viewHeading} tabIndex={-1}>{view==="accounts" ? (admin && canManageAccounts ? "계정과 권한" : "내 계정") : view==="transactions" ? "주문 내역" : view==="activity" ? "변경 이력" : admin ? "공간과 패키지" : "스토어 한눈에"}</h1>
+              <h1 ref={viewHeading} tabIndex={-1}>{view==="inquiries" ? "고객 문의" : view==="accounts" ? (admin && canManageAccounts ? "계정과 권한" : "내 계정") : view==="transactions" ? "주문 내역" : view==="activity" ? "변경 이력" : admin ? "공간과 패키지" : "스토어 한눈에"}</h1>
               <p>
-                {view==="accounts" ? "로그인 계정과 이용 권한을 확인하세요." : view==="activity" ? "패키지의 공개 상태가 바뀐 기록입니다." : view==="transactions" ? "주문 구성과 금액을 확인하고 검색하세요." : admin ? "고객에게 공개할 공간과 패키지를 관리하세요." : "공간 패키지의 주문과 매출을 확인하세요."}
+                {view==="inquiries" ? "문의와 답변을 검토하고 처리 상태를 관리하세요." : view==="accounts" ? "로그인 계정과 이용 권한을 확인하세요." : view==="activity" ? "패키지의 공개 상태가 바뀐 기록입니다." : view==="transactions" ? "주문 구성과 금액을 확인하고 검색하세요." : admin ? "고객에게 공개할 공간과 패키지를 관리하세요." : "공간 패키지의 주문과 매출을 확인하세요."}
               </p>
             </div>
             {user && (
@@ -426,7 +427,8 @@ export default function StaffDashboard({
               </div>
               <div hidden={view!=="accounts"}>{admin ? <StaffAccess auth={clientAuth()} user={user} apiOrigin={apiOrigin}
                 disabled={busy} onBusyChange={setAccessBusy} onManagementChange={setCanManageAccounts} onChanged={()=>setRevision(v=>v+1)}/> : <StaffRequests auth={clientAuth()} user={user} apiOrigin={apiOrigin} defaultRole="merchant" onChanged={()=>setRevision(v=>v+1)} onBusyChange={setAccessBusy}/>}</div>
-              <div className="status-line" hidden={view==="accounts"}>
+              {view==="inquiries" && <InquiryInbox key={user.uid+":"+admin} user={user} mode={admin?"admin":"merchant"} apiOrigin={apiOrigin}/>}
+              <div className="status-line" hidden={view==="accounts" || view==="inquiries"}>
                 <span>
                   {data ? "마지막으로 확인한 모의 거래" : "권한·DB 확인 중"}
                 </span>
