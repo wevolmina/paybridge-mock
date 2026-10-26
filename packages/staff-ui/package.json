@@ -7,7 +7,9 @@
     "./style.css": "./style.css",
     "./dashboard-ux.css": "./dashboard-ux.css",
     "./SocialLogin": "./SocialLogin.tsx",
-    "./social-login.css": "./social-login.css"
+    "./social-login.css": "./social-login.css",
+    "./InquiryInbox": "./InquiryInbox.tsx",
+    "./inquiries.css": "./inquiries.css"
   },
   "peerDependencies": {
     "react": "^19.0.0",
