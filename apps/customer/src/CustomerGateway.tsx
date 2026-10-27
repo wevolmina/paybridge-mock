@@ -16,7 +16,7 @@ function OrderSummary({user}:{user:User}){
  const [result,setResult]=useState<{loading:boolean;receipt?:Receipt;error?:string;pending?:boolean}>({loading:true});
  useEffect(()=>{let current=true;const controller=new AbortController();
   void(async()=>{try{
-   const id=localStorage.getItem('smartspace-receipt:'+user.uid),pending=!!localStorage.getItem('smartspace-pending:'+user.uid);
+   const id=localStorage.getItem('smartspace-receipt:'+user.uid),pending=!!(localStorage.getItem('paybridge:scenario-pending:'+user.uid)||localStorage.getItem('smartspace-pending:'+user.uid));
    if(!id){if(current)setResult({loading:false,pending});return;}
    const response=await fetch(API+'/api/receipt?paymentId='+encodeURIComponent(id),{headers:{Authorization:'Bearer '+await user.getIdToken()},cache:'no-store',signal:controller.signal});
    if(!response.ok)throw Error();
@@ -25,7 +25,7 @@ function OrderSummary({user}:{user:User}){
   return()=>{current=false;controller.abort()};
  },[user.uid]);
  if(result.loading)return <p role="status">주문 기록을 확인하고 있어요.</p>;
- return <section className="account-section"><h3>주문 내역</h3><p>이 브라우저에 보관된 최근 모의 주문을 확인합니다.</p>{result.error?<p role="alert">{result.error}</p>:result.receipt?<div className="account-receipt"><strong>{result.receipt.productName}</strong><p>{result.receipt.amount.toLocaleString('ko-KR')}원</p><dl><dt>주문 번호</dt><dd>{result.receipt.orderId}</dd><dt>주문 상태</dt><dd>{result.receipt.status==='MOCK_APPROVED'?'모의 승인 · 실제 청구 없음':result.receipt.status}</dd></dl></div>:<p className="account-empty">이 브라우저에 저장된 주문 내역이 없어요.</p>}{result.pending&&<a href="/?legacy=1#checkout">진행 중인 주문 결과 확인하기</a>}</section>;
+ return <section className="account-section"><h3>주문 내역</h3><p>이 브라우저에 보관된 최근 모의 주문을 확인합니다.</p>{result.error?<p role="alert">{result.error}</p>:result.receipt?<div className="account-receipt"><strong>{result.receipt.productName}</strong><p>{result.receipt.amount.toLocaleString('ko-KR')}원</p><dl><dt>주문 번호</dt><dd>{result.receipt.orderId}</dd><dt>주문 상태</dt><dd>{result.receipt.status==='MOCK_APPROVED'?'모의 승인 · 실제 청구 없음':result.receipt.status}</dd></dl></div>:<p className="account-empty">이 브라우저에 저장된 주문 내역이 없어요.</p>}{result.pending&&<a href="/#purchase">진행 중인 주문 결과 확인하기</a>}</section>;
 }
 function SavedConfiguration(){
  const [choices]=useState(()=>{try{return restoreChoices(localStorage.getItem('paybridge:scenario-draft:v1'))}catch{return []}});
