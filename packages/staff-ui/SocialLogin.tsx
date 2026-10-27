@@ -1,7 +1,7 @@
 "use client";
 import {useEffect, useRef, useState} from "react";
 import {GoogleAuthProvider, linkWithPopup, signInWithCustomToken, signInWithPopup, type Auth} from "firebase/auth";
-import {readSocialResult, socialErrorMessage, socialErrorCode} from "./social-policy";
+import {readSocialResult, socialErrorMessage, socialErrorCode, guestOrderNeedsProtection, googleLoginAction} from "./social-policy";
 type Props = {
   auth: Auth | null;
   apiOrigin: string;
@@ -18,6 +18,8 @@ export default function SocialLogin({auth, apiOrigin, disabled = false,
   const [provider, setProvider] = useState<keyof Config | null>(null);
   const [error, setError] = useState("");
   const [diagnostic,setDiagnostic] = useState("");
+  const protectGuestOrder = blockCustomForGuest || guestOrderNeedsProtection(auth?.currentUser,
+    key => window.localStorage.getItem(key));
   const working = useRef(false), mounted = useRef(true);
   const cancel = useRef<(() => void) | null>(null);
   useEffect(() => {
@@ -64,14 +66,14 @@ export default function SocialLogin({auth, apiOrigin, disabled = false,
     });
   }
   async function login(p: keyof Config) {
-    if (!auth || disabled || working.current || !config?.[p] || (p !== "google" && blockCustomForGuest)) return;
+    if (!auth || disabled || working.current || !config?.[p] || (p !== "google" && protectGuestOrder)) return;
     if (allowLogin && !allowLogin(p)) {setDiagnostic("");setError("기존 비회원 주문 결과를 먼저 확인해 주세요. 주문 계정을 자동으로 바꾸지 않습니다."); return;}
     working.current = true; setProvider(p); setError(""); setDiagnostic(""); onBusyChange?.(true);
     try {
       if (p === "google") {
         const google = new GoogleAuthProvider();
         google.setCustomParameters({prompt: "select_account"});
-        if (auth.currentUser?.isAnonymous) await linkWithPopup(auth.currentUser, google);
+        if (auth.currentUser && googleLoginAction(auth.currentUser.isAnonymous, protectGuestOrder) === "link") await linkWithPopup(auth.currentUser, google);
         else await signInWithPopup(auth, google);
       } else {
         const token = await customLogin(p);
@@ -89,11 +91,11 @@ export default function SocialLogin({auth, apiOrigin, disabled = false,
     <div className="social-login-buttons">
       {(Object.keys(labels) as (keyof Config)[]).map(p =>
         <button key={p} type="button" className={"social-button social-" + p}
-          disabled={!auth || disabled || !!provider || !config?.[p] || (p !== "google" && blockCustomForGuest)}
+          disabled={!auth || disabled || !!provider || !config?.[p] || (p !== "google" && protectGuestOrder)}
           onClick={() => void login(p)}>
           <span>{labels[p]}로 계속하기</span>
           <small>{provider === p ? "로그인 확인 중…" : config === null ? "연결 확인 중…" :
-            !config[p] ? "연결 준비 중" : p !== "google" && blockCustomForGuest ? "비회원 주문 확인 필요" : ""}</small>
+            !config[p] ? "연결 준비 중" : p !== "google" && protectGuestOrder ? "비회원 주문 확인 필요" : ""}</small>
         </button>)}
     </div>
     {error && <p className="social-error" role="alert">{error}{diagnostic&&<small className="social-diagnostic">진단 코드: {diagnostic}</small>}</p>}

@@ -55,3 +55,20 @@ export function socialErrorMessage(error: unknown) {
   if (code === "SOCIAL_TIMEOUT") return "로그인 시간이 지났습니다. 다시 시도해 주세요.";
   return "간편로그인을 완료하지 못했습니다. 아래 진단 코드를 사이트 운영자에게 전달해 주세요.";
 }
+
+// Only a guest with order records needs to keep its anonymous UID.
+// An empty anonymous session must not prevent signing in to an existing account.
+export function guestOrderNeedsProtection(
+  user: {uid: string; isAnonymous: boolean} | null | undefined,
+  read: (key: string) => string | null,
+) {
+  if (!user?.isAnonymous) return false;
+  try {
+    return ["smartspace-pending:", "smartspace-receipt:", "smartspace-guest-history:",
+      "paybridge:scenario-pending:", "paybridge:scenario-receipt:"]
+      .some(prefix => !!read(prefix + user.uid));
+  } catch { return true; }
+}
+export function googleLoginAction(isAnonymous: boolean, protectGuestOrder: boolean) {
+  return isAnonymous && protectGuestOrder ? "link" : "signIn";
+}
