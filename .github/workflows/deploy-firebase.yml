@@ -6,6 +6,7 @@ on:
     paths:
       - 'apps/customer/**'
       - 'packages/staff-ui/**'
+      - 'packages/scenario-prices.ts'
       - 'package.json'
       - 'package-lock.json'
       - 'firebase.json'
@@ -52,7 +53,7 @@ jobs:
         shell: bash
         run: |
           git fetch --no-tags --depth=1 origin main
-          git diff --name-only "$GITHUB_SHA" FETCH_HEAD -- apps/customer packages/staff-ui package.json package-lock.json firebase.json .firebaserc scripts/check-static-deploy-env.mjs .github/workflows/deploy-firebase.yml > "$RUNNER_TEMP/static-release-changes.txt"
+          git diff --name-only "$GITHUB_SHA" FETCH_HEAD -- apps/customer packages/staff-ui packages/scenario-prices.ts package.json package-lock.json firebase.json .firebaserc scripts/check-static-deploy-env.mjs .github/workflows/deploy-firebase.yml > "$RUNNER_TEMP/static-release-changes.txt"
           if [ -s "$RUNNER_TEMP/static-release-changes.txt" ]; then
             echo 'current=false' >> "$GITHUB_OUTPUT"
             echo 'Newer target files exist on main; skipped this outdated deployment.' >> "$GITHUB_STEP_SUMMARY"
