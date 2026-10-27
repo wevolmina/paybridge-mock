@@ -1,4 +1,5 @@
-import React from 'react';
+import React,{lazy,Suspense} from 'react';
 import {createRoot} from 'react-dom/client';
-import ScenarioExperience from './ScenarioExperience';
-createRoot(document.getElementById('root')!).render(<React.StrictMode><ScenarioExperience initialRoom="kitchen"/></React.StrictMode>);
+import CustomerGateway from './CustomerGateway';
+const ScenarioExperience=lazy(()=>import('./ScenarioExperience'));
+createRoot(document.getElementById('root')!).render(<React.StrictMode><CustomerGateway><Suspense fallback={<p role="status">공간을 준비하고 있어요…</p>}><ScenarioExperience initialRoom="kitchen"/></Suspense></CustomerGateway></React.StrictMode>);
