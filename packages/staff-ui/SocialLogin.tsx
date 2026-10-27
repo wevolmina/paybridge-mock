@@ -96,9 +96,6 @@ export default function SocialLogin({auth, apiOrigin, disabled = false,
             !config[p] ? "연결 준비 중" : p !== "google" && blockCustomForGuest ? "비회원 주문 확인 필요" : ""}</small>
         </button>)}
     </div>
-    {blockCustomForGuest && <p className="social-help">비회원 주문은 먼저 결과를 확인해 주세요.
-      구글 계정 연결은 현재 비회원 계정을 유지하지만, 이미 다른 계정에 연결된 경우 자동으로 합치지 않습니다.
-      카카오·네이버로 기존 비회원 주문을 옮기는 기능은 지원하지 않습니다.</p>}
     {error && <p className="social-error" role="alert">{error}{diagnostic&&<small className="social-diagnostic">진단 코드: {diagnostic}</small>}</p>}
     <p className="social-help">선택한 서비스의 로그인 창이 열립니다.</p>
   </div>;
