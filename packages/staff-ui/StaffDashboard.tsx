@@ -680,7 +680,7 @@ export default function StaffDashboard({
                             <small>{p.payment_id}</small>
                           </td>
                           <td>{date(p.created_at)}</td>
-                          <td>{p.quantity}</td>
+                          <td>{p.items?.length?p.items.reduce((sum,item)=>sum+Number(item.quantity),0):p.quantity}</td>
                           <td>{money(p.amount)}원</td>
                           <td>
                             <span className="approved">모의 승인</span>
