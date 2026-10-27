@@ -1,4 +1,5 @@
 "use client";
+import './session.css';
 import { useEffect, useRef, useState } from "react";
 import { getApps, initializeApp, type FirebaseOptions } from "firebase/app";
 import {
@@ -266,10 +267,18 @@ export default function StaffDashboard({
     }
   }
   async function logout() {
-    current.current = null;
-    setData(null);
+    if (busy || accessBusy) return;
+    setBusy(true);
     setError("");
-    await signOut(clientAuth());
+    try {
+      await signOut(clientAuth());
+      current.current = null;
+      setData(null);
+    } catch {
+      setError("로그아웃하지 못했습니다. 다시 시도해 주세요.");
+    } finally {
+      setBusy(false);
+    }
   }
   async function toggle(p: Package) {
     if (!user || saving.current) return;
@@ -398,7 +407,7 @@ export default function StaffDashboard({
           <span>
             SMART HOME / <b>{title}</b>
           </span>
-          <span className="badge">{admin ? "운영 관리" : "판매자 전용"} · 모의 서비스</span>
+          <div className="workspace-session"><span className="badge">{admin ? "운영 관리" : "판매자 전용"} · 모의 서비스</span><button disabled={busy || accessBusy} onClick={() => void logout()}>로그아웃</button></div>
         </header>
         <main id="overview">
           <div className="heading">
@@ -411,11 +420,7 @@ export default function StaffDashboard({
                 {view==="inquiries" ? "문의와 답변을 검토하고 처리 상태를 관리하세요." : view==="accounts" ? "로그인 계정과 이용 권한을 확인하세요." : view==="activity" ? "패키지의 공개 상태가 바뀐 기록입니다." : view==="transactions" ? "주문 구성과 금액을 확인하고 검색하세요." : admin ? "고객에게 공개할 공간과 패키지를 관리하세요." : "공간 패키지의 주문과 매출을 확인하세요."}
               </p>
             </div>
-            {user && (
-              <div className="actions">
-                <button disabled={busy || accessBusy} onClick={() => void logout()}>로그아웃</button>
-              </div>
-            )}
+
           </div>
           {!configured && (
             <p className="notice">로그인 연결 설정을 확인 중입니다.</p>
